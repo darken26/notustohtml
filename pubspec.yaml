@@ -9,9 +9,10 @@ environment:
 dependencies:
   notus_format: ^1.0.2
   html: ^0.14.0
-  quill_delta:
-    git:
-      url: git://github.com/darken26/quill-delta-dart.git
+  quill_format: ^1.0.0
+#   quill_delta:
+#     git:
+#       url: git://github.com/darken26/quill-delta-dart.git
 
 dev_dependencies:
   test:
