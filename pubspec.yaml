@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  notus: ^0.1.5
+  notus_format: ^1.0.2
   quill_delta: ^1.0.2
   html: ^0.14.0
 
