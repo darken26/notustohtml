@@ -94,13 +94,13 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
 
     while (iterator.hasNext) {
       final op = iterator.next();
-      final lf = op.data.indexOf('\n');
+      final lf = op.data.toString().indexOf('\n');
       if (lf == -1) {
         _handleSpan(op.data, op.attributes);
       } else {
         var span = StringBuffer();
-        for (var i = 0; i < op.data.length; i++) {
-          if (op.data.codeUnitAt(i) == 0x0A) {
+        for (var i = 0; i < op.data.toString().length; i++) {
+          if (op.data.toString().codeUnitAt(i) == 0x0A) {
             if (span.isNotEmpty) {
               // Write the span if it's not empty.
               _handleSpan(span.toString(), op.attributes);
@@ -110,7 +110,7 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
             _handleLine(op.attributes);
             span.clear();
           } else {
-            span.writeCharCode(op.data.codeUnitAt(i));
+            span.writeCharCode(op.data.toString().codeUnitAt(i));
           }
         }
         // Remaining span
@@ -193,8 +193,6 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
       _writeHeadingTag(buffer, attribute as NotusAttribute<int>, close: close);
     } else if (attribute.key == NotusAttribute.block.key) {
       _writeBlockTag(buffer, attribute as NotusAttribute<String>, close: close);
-    } else if (attribute.key == NotusAttribute.embed.key) {
-      _writeEmbedTag(buffer, attribute as EmbedAttribute, close: close);
     } else {
       throw ArgumentError('Cannot handle $attribute');
     }
@@ -239,16 +237,6 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
       }
     }
   }
-
-  void _writeEmbedTag(StringBuffer buffer, EmbedAttribute embed,
-      {bool close = false}) {
-    if (close) return;
-    if (embed.type == EmbedType.horizontalRule) {
-      buffer.write("<hr>");
-    } else if (embed.type == EmbedType.image) {
-      buffer.write('<img src="${embed.value["source"]}">');
-    }
-  }
 }
 
 class _NotusHtmlDecoder extends Converter<String, Delta> {
@@ -262,7 +250,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
       if (index + 1 < html.body.nodes.length) next = html.body.nodes[index + 1];
       delta = _parseNode(node, delta, next);
     });
-    if (delta.last.data.endsWith("\n")) {
+    if (delta.last.data.toString().endsWith("\n")) {
       return delta;
     }
     return delta..insert("\n");
@@ -309,10 +297,10 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
 
   Delta _parseElement(Element element, Delta delta, String type,
       {Map<String, dynamic> attributes,
-      String listType,
-      next,
-      isNewLine,
-      inBlock}) {
+        String listType,
+        next,
+        isNewLine,
+        inBlock}) {
     if (type == "block") {
       Map<String, dynamic> blockAttributes = {};
       if (inBlock != null) blockAttributes = inBlock;
@@ -344,23 +332,24 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         delta..insert("\n", blockAttributes);
       }
       return delta;
-    } else if (type == "embed") {
-      NotusDocument tempdocument;
-      if (element.localName == "img") {
-        delta..insert("\n");
-        tempdocument = NotusDocument.fromDelta(delta);
-        var index = tempdocument.length;
-        tempdocument.format(index - 1, 0,
-            NotusAttribute.embed.image(element.attributes["src"]));
-      }
-      if (element.localName == "hr") {
-        delta..insert("\n");
-        tempdocument = NotusDocument.fromDelta(delta);
-        var index = tempdocument.length;
-        tempdocument.format(index - 1, 0, NotusAttribute.embed.horizontalRule);
-      }
-      return tempdocument.toDelta();
-    } else {
+    } // else if (type == "embed") {
+    //   NotusDocument tempdocument;
+    //   if (element.localName == "img") {
+    //     delta..insert("\n");
+    //     tempdocument = NotusDocument.fromDelta(delta);
+    //     var index = tempdocument.length;
+    //     tempdocument.format(index - 1, 0,
+    //         NotusAttribute.embed.image(element.attributes["src"]));
+    //   }
+    //   if (element.localName == "hr") {
+    //     delta..insert("\n");
+    //     tempdocument = NotusDocument.fromDelta(delta);
+    //     var index = tempdocument.length;
+    //     tempdocument.format(index - 1, 0, NotusAttribute.embed.horizontalRule);
+    //   }
+    //   return tempdocument.toDelta();
+    // } 
+    else {
       if (attributes == null) attributes = {};
       if (element.localName == "em") {
         attributes["i"] = true;
